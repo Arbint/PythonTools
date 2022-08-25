@@ -1,16 +1,32 @@
-# This is a sample Python script.
+import pandas
+import pandas as pd
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+df = pandas.read_csv("../Assets/webInq.csv")
 
+outDf = pandas.DataFrame()
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+names = []
+emails = []
 
+for item in df.Body:
+    allWords = item.split(' ')
+    name = ""
+    for word in allWords:
+        if "has" in word:
+            if "\u2009" in word:
+                name += word.split("\u2009")[0]
+            break
+        name += word + " "
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+    email = ""
+    for i in range(0, len(allWords)):
+        if "Email:" in allWords[i]:
+            email = allWords[i+1][:-7]
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    names.append(name)
+    emails.append(email)
+
+outDf["names"] = names
+outDf["emails"] = emails
+
+outDf.to_csv("../Assets/nameEmail.csv", index=False)
