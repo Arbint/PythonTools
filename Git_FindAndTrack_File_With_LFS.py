@@ -1,6 +1,7 @@
 import os
 import subprocess
 import tkinter.filedialog
+import tkinter
 from tkinter import *
 from os.path import join, getsize
 
