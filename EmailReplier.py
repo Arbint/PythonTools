@@ -85,4 +85,4 @@ def CheckAndSendWebInqReplyMsg():
 
             SendOutlookEmailTo(email, "Thank you for your interest in MGD!", msg)
 
-CheckAndSendWebInqReplyMsg()
+#CheckAndSendWebInqReplyMsg()
