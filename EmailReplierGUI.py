@@ -1,3 +1,4 @@
+import random
 from tkinter import *
 from tkcalendar import Calendar
 from OutlookUtility import GetIboxMsgBodyAsList
@@ -73,7 +74,8 @@ def PreviewEmailCmd(subject, body, outText):
         outText.insert(END, "no contact found to preview")
         return
 
-    bodyStr = ComposeEmailForContact(allContacts[0], body)
+    randIndex = random.randint(0, len(allContacts)-1)
+    bodyStr = ComposeEmailForContact(allContacts[randIndex], body)
     outText.insert(END, bodyStr)
     outText.config(state='disabled')
 def SendCmd(subject, body):
