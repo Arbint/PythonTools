@@ -58,7 +58,9 @@ def ExtractContactCmd(outText):
         allContacts.append(Contact(fullName, email, phone))
         outText.insert(END, f"{fullName} | {email} | {phone}\n")
     outText.config(state='disabled')
-def ComposeEmailForContact(contact, body):
+
+
+def ComposeMsgForContact(contact, body):
     fullname = contact.name
     name = fullname.split(" ")[0]
     bodyStr = body.get("1.0", END)
@@ -75,16 +77,35 @@ def PreviewEmailCmd(subject, body, outText):
         return
 
     randIndex = random.randint(0, len(allContacts)-1)
-    bodyStr = ComposeEmailForContact(allContacts[randIndex], body)
+    bodyStr = ComposeMsgForContact(allContacts[randIndex], body)
     outText.insert(END, bodyStr)
     outText.config(state='disabled')
+
+
+def GenerateMsgCmd(subject, body, outText):
+    global allContacts
+    outText.config(state='normal')
+    ClearTextContent(outText)
+    contactCnt = len(allContacts)
+    if contactCnt == 0:
+        outText.insert(END, "no contact found to preview")
+        return
+
+    for contact in allContacts:
+        bodyStr = ComposeMsgForContact(contact, body)
+        outText.insert(END, contact.phone + "\n\n")
+        outText.insert(END, bodyStr)
+        outText.insert(END, "--------------------------------------------\n\n")
+
+    outText.config(state='disabled')
+
 def SendCmd(subject, body):
     global allContacts
     for contact in allContacts:
 
         email = contact.email
         subjectStr = subject.get("1.0", END)
-        bodyStr = ComposeEmailForContact(contact, body)
+        bodyStr = ComposeMsgForContact(contact, body)
 
         SendOutlookEmailTo(email, subjectStr, bodyStr)
 
@@ -102,12 +123,19 @@ Thank you!
 JT
 """
     return msg
+
+def GetTemplateSMSBody():
+    msg = """Dear {name}, this is Professor Li, director of the Master of Game Development program. We have received a web inquiry from you, and thank you for your interest in the program.If you have any questions about the program, please do not hesitate to reply to this message directly, and I am more than happy to answer them.
+    
+Thank you!
+"""
+    return msg
 def GetTemplateSubject():
     return "Thank you for your interest in MGD!"
 
 window = Tk()
 window.title("Web Inquiry Replier")
-window.config(background=winBg, height=800, width=1080)
+window.config(background=winBg, height=1200, width=1080)
 
 #Time Range
 TimeRangeFrame = Frame(window, background=winBg)
@@ -164,4 +192,25 @@ OutPreviewText.grid(row=6, column=0)
 
 SendEmailBtn = Button(OutFrame, text="Send Email", width=outFrameWidth-7, background=btBg, font=fnt, fg=winFg, command=lambda : SendCmd(subject=OutEmailSubectEntry,body=OutEmailBodyEntry))
 SendEmailBtn.grid(row=7, column=0, pady=10)
+
+#text msg data:
+TextFrameWidth = 122
+TextPreivewBoxWidth = 52
+TextPreivewBoxHeight = 15
+TextPreivewBtnMargin = 5
+TextPreviewBtnWidth = TextFrameWidth - TextPreivewBoxWidth * 2 - TextPreivewBtnMargin * 2
+
+TextFrame = Frame(window, background=winBg)
+TextFrame.place(x=10,y=800)
+
+Label(TextFrame, text="Out Messages:", bg=winBg, font=fnt, fg=winFg).grid(row=0, column=0, sticky=W)
+OutMsgBodyEntry = Text(TextFrame, width=TextPreivewBoxWidth, height=TextPreivewBoxHeight,  wrap=WORD, background=tfBg, fg=winFg, font=fnt, insertbackground=insertbackgroundCd)
+OutMsgBodyEntry.grid(row=1, column=0, pady=10)
+OutMsgBodyEntry.insert(END, GetTemplateSMSBody())
+
+MsgPreviewText = Text(TextFrame, width=TextPreivewBoxWidth, height=TextPreivewBoxHeight,  wrap=WORD, background=tfBg, fg=winFg, font=fnt, insertbackground=insertbackgroundCd, state= "disabled")
+MsgPGenerateBtn = Button(TextFrame, text="Generate", width=TextPreviewBtnWidth, height=TextPreivewBoxHeight-2, background=btBg, font=fnt, fg=winFg, command=lambda : GenerateMsgCmd(subject=OutEmailSubectEntry,body=OutMsgBodyEntry,outText=MsgPreviewText))
+MsgPGenerateBtn.grid(row=1, column=1, padx= TextPreivewBtnMargin, pady= TextPreivewBtnMargin)
+MsgPreviewText.grid(row=1, column=2)
+
 window.mainloop()
